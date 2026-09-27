@@ -42,3 +42,15 @@ export async function generateJson<T extends z.ZodType>(
   }
   throw lastError;
 }
+
+/** Ask Gemini for free-form text (used for the dispute letter). */
+export async function generateText(prompt: string): Promise<string> {
+  const response = await getClient().models.generateContent({
+    model: MODEL,
+    contents: prompt,
+    config: { temperature: 0.4 },
+  });
+  const text = response.text?.trim();
+  if (!text) throw new Error("Gemini returned an empty response.");
+  return text;
+}
