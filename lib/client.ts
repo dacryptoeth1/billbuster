@@ -20,10 +20,24 @@ async function readResponse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-export async function extractBill(file: File): Promise<Bill> {
+// Covers the server's retry: two model calls plus upload time.
+const EXTRACT_TIMEOUT_MS = 60_000;
+
+export async function extractBill(file: File, timeoutMs = EXTRACT_TIMEOUT_MS): Promise<Bill> {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch("/api/extract", { method: "POST", body: form });
+  const res = await fetch("/api/extract", {
+    method: "POST",
+    body: form,
+    signal: AbortSignal.timeout(timeoutMs),
+  }).catch((err: unknown) => {
+    const timedOut = err instanceof DOMException && err.name === "TimeoutError";
+    throw new Error(
+      timedOut
+        ? "Reading your bill took too long. Please try again, or try a sample bill."
+        : "Couldn't reach the server. Check your connection and try again.",
+    );
+  });
   return (await readResponse<{ bill: Bill }>(res)).bill;
 }
 
@@ -33,6 +47,11 @@ export async function explainItems(lineItems: Bill["lineItems"]): Promise<string
 
 export async function draftLetter(bill: Bill, financialAssistance: boolean): Promise<string> {
   return (await postJson<{ letter: string }>("/api/letter", { bill, financialAssistance })).letter;
+}
+
+export async function getVoiceSession(): Promise<string> {
+  const res = await fetch("/api/voice-session", { cache: "no-store" });
+  return (await readResponse<{ signedUrl: string }>(res)).signedUrl;
 }
 
 // The current bill lives only in this browser tab's sessionStorage.

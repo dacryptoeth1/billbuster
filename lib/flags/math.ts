@@ -22,7 +22,7 @@ export function findMathErrors(bill: Bill): Flag[] {
       type: "math",
       severity: "low",
       lineIndex: null,
-      reason: `Line items add up to ${formatUsd(lineSum)}, but the bill's total is ${formatUsd(bill.totalBilled)}. Ask the provider to explain the difference.`,
+      reason: `Line items add up to ${formatUsd(lineSum)}, but the bill's total is ${formatUsd(bill.totalBilled)}, which is less than the items listed.`,
       estimatedOvercharge: 0,
     });
   }
@@ -34,7 +34,7 @@ export function findMathErrors(bill: Bill): Flag[] {
       type: "math",
       severity: "high",
       lineIndex: null,
-      reason: `Total (${formatUsd(bill.totalBilled)}) minus insurance (${formatUsd(bill.insurancePaid)}) is ${formatUsd(expectedOwed)}, but you're asked to pay ${formatUsd(bill.patientOwes)}.`,
+      reason: `Total (${formatUsd(bill.totalBilled)}) minus insurance (${formatUsd(bill.insurancePaid)}) is ${formatUsd(expectedOwed)}, but the amount due is ${formatUsd(bill.patientOwes)}.`,
       estimatedOvercharge: owedDiff,
     });
   }
