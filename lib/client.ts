@@ -41,8 +41,19 @@ export async function extractBill(file: File, timeoutMs = EXTRACT_TIMEOUT_MS): P
   return (await readResponse<{ bill: Bill }>(res)).bill;
 }
 
-export async function explainItems(lineItems: Bill["lineItems"]): Promise<string[]> {
-  return (await postJson<{ explanations: string[] }>("/api/explain", { lineItems })).explanations;
+// One in-flight request per bill, so re-renders (and React Strict Mode's double
+// effects in dev) don't spend extra Gemini quota.
+const explainRequests = new Map<string, Promise<string[]>>();
+
+export function explainItems(lineItems: Bill["lineItems"]): Promise<string[]> {
+  const key = JSON.stringify(lineItems);
+  let request = explainRequests.get(key);
+  if (!request) {
+    request = postJson<{ explanations: string[] }>("/api/explain", { lineItems }).then((r) => r.explanations);
+    request.catch(() => explainRequests.delete(key)); // let a later visit retry after a failure
+    explainRequests.set(key, request);
+  }
+  return request;
 }
 
 export async function draftLetter(bill: Bill, financialAssistance: boolean): Promise<string> {
