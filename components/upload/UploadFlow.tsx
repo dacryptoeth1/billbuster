@@ -5,74 +5,77 @@ import { useRouter } from "next/navigation";
 import { Dropzone } from "./Dropzone";
 import { FilePreview, type Preview } from "./FilePreview";
 import { SamplePicker } from "./SamplePicker";
+import { ReadingLabel } from "./ReadingLabel";
 import { extractBill, saveBill } from "@/lib/client";
 import type { SampleBill } from "@/lib/samples";
 import type { Bill } from "@/lib/schema";
 
-type Status = "idle" | "reading" | "error";
+// On stage, a sample should fall back quickly rather than keep the audience waiting.
+const SAMPLE_TIMEOUT_MS = 25_000;
+
+type Status =
+  { state: "idle" } | { state: "reading"; sampleId?: string } | { state: "error"; message: string };
 
 export function UploadFlow() {
   const router = useRouter();
   const [preview, setPreview] = useState<Preview | null>(null);
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState<Status>({ state: "idle" });
 
   function selectFile(file: File) {
     if (preview) URL.revokeObjectURL(preview.url);
     setPreview({ file, url: URL.createObjectURL(file) });
-    setStatus("idle");
-    setError("");
+    setStatus({ state: "idle" });
   }
 
-  async function analyze(target: File, fallback?: Bill) {
-    setStatus("reading");
-    setError("");
+  function showResults(bill: Bill) {
+    saveBill(bill);
+    router.push("/results");
+  }
+
+  // Every path ends in either navigation or a visible error, never silence.
+  async function analyze(file: File) {
+    setStatus({ state: "reading" });
     try {
-      saveBill(await extractBill(target));
-      router.push("/results");
+      showResults(await extractBill(file));
     } catch (err) {
-      if (fallback) {
-        // Samples must always work on stage, even if the AI call fails.
-        console.warn("Extraction failed; using pre-extracted sample data.", err);
-        saveBill(fallback);
-        router.push("/results");
-        return;
-      }
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setStatus({ state: "error", message: messageFrom(err) });
     }
   }
 
   async function pickSample(sample: SampleBill) {
-    const res = await fetch(sample.image).catch(() => null);
-    if (!res?.ok) {
-      saveBill(sample.bill);
-      router.push("/results");
-      return;
+    setStatus({ state: "reading", sampleId: sample.id });
+    try {
+      const res = await fetch(sample.image);
+      if (!res.ok) throw new Error(`Sample image returned ${res.status}`);
+      const file = new File([await res.blob()], `${sample.id}.png`, { type: "image/png" });
+      selectFile(file);
+      setStatus({ state: "reading", sampleId: sample.id });
+      showResults(await extractBill(file, SAMPLE_TIMEOUT_MS));
+    } catch (err) {
+      // Samples must always work on stage: fall back to the known-good extraction.
+      console.warn("Sample extraction failed; using pre-extracted data.", err);
+      try {
+        showResults(sample.bill);
+      } catch (fallbackErr) {
+        setStatus({ state: "error", message: messageFrom(fallbackErr) });
+      }
     }
-    const blob = await res.blob();
-    const file = new File([blob], `${sample.id}.png`, { type: "image/png" });
-    selectFile(file);
-    analyze(file, sample.bill);
   }
 
-  const reading = status === "reading";
+  const reading = status.state === "reading";
 
   return (
     <div className="space-y-8">
       <Dropzone onFile={selectFile} disabled={reading} />
 
+      {status.state === "error" && (
+        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {status.message}
+        </p>
+      )}
+
       {preview && (
         <div className="space-y-4">
-          <FilePreview preview={preview} />
-          {error && (
-            <p
-              role="alert"
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {error}
-            </p>
-          )}
           <button
             type="button"
             onClick={() => analyze(preview.file)}
@@ -81,19 +84,23 @@ export function UploadFlow() {
           >
             {reading ? <ReadingLabel /> : "Check my bill"}
           </button>
+          {/* Button sits above the preview so its status is visible without scrolling. */}
+          <FilePreview preview={preview} />
         </div>
       )}
 
-      <SamplePicker onPick={pickSample} disabled={reading} />
+      <SamplePicker
+        onPick={pickSample}
+        disabled={reading}
+        activeId={status.state === "reading" ? status.sampleId : undefined}
+      />
     </div>
   );
 }
 
-function ReadingLabel() {
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-      Reading your bill…
-    </span>
-  );
+function messageFrom(err: unknown) {
+  if (err instanceof DOMException && err.name === "SecurityError") {
+    return "Your browser is blocking storage for this site. Try a normal (non-private) window.";
+  }
+  return err instanceof Error ? err.message : "Something went wrong. Please try again.";
 }
