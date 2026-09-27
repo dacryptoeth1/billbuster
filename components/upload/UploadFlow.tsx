@@ -6,6 +6,7 @@ import { Dropzone } from "./Dropzone";
 import { FilePreview, type Preview } from "./FilePreview";
 import { SamplePicker } from "./SamplePicker";
 import { ReadingLabel } from "./ReadingLabel";
+import { Alert } from "@/components/Alert";
 import { extractBill, saveBill } from "@/lib/client";
 import type { SampleBill } from "@/lib/samples";
 import type { Bill } from "@/lib/schema";
@@ -68,11 +69,7 @@ export function UploadFlow() {
     <div className="space-y-8">
       <Dropzone onFile={selectFile} disabled={reading} />
 
-      {status.state === "error" && (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {status.message}
-        </p>
-      )}
+      {status.state === "error" && <Alert>{status.message}</Alert>}
 
       {preview && (
         <div className="space-y-4">
@@ -80,7 +77,7 @@ export function UploadFlow() {
             type="button"
             onClick={() => analyze(preview.file)}
             disabled={reading}
-            className="w-full rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-70"
+            className="btn btn-primary w-full text-lg"
           >
             {reading ? <ReadingLabel /> : "Check my bill"}
           </button>

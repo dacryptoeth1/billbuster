@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Alert } from "@/components/Alert";
 import { draftLetter } from "@/lib/client";
 import type { Bill } from "@/lib/schema";
 
@@ -38,9 +39,9 @@ export function LetterPanel({ bill }: { bill: Bill }) {
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6">
-      <h2 className="text-lg font-semibold">Dispute these charges</h2>
-      <p className="mt-1 text-sm text-slate-600">
+    <section className="paper rounded-2xl p-6 sm:p-8">
+      <h2 className="font-display text-2xl font-extrabold">Now let&apos;s get it back</h2>
+      <p className="mt-1 text-ink-soft">
         We&apos;ll draft a polite, firm letter to the billing office that cites each flagged item.
       </p>
 
@@ -49,32 +50,24 @@ export function LetterPanel({ bill }: { bill: Bill }) {
           type="checkbox"
           checked={financialAssistance}
           onChange={(e) => setFinancialAssistance(e.target.checked)}
-          className="size-4 accent-emerald-600"
+          className="size-4 accent-ink"
         />
         Also ask about financial assistance
       </label>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          onClick={generate}
-          disabled={loading}
-          className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-70"
-        >
+        <button type="button" onClick={generate} disabled={loading} className="btn btn-primary">
           {loading ? "Drafting…" : letter ? "Redraft letter" : "Draft dispute letter"}
         </button>
-        <Link
-          href="/practice"
-          className="rounded-xl border border-emerald-600 px-6 py-3 text-center font-medium text-emerald-700 transition hover:bg-emerald-50"
-        >
+        <Link href="/practice" className="btn btn-secondary">
           Practice the call
         </Link>
       </div>
 
       {error && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
-          {error}
-        </p>
+        <div className="mt-3">
+          <Alert>{error}</Alert>
+        </div>
       )}
 
       {letter && (
@@ -84,7 +77,7 @@ export function LetterPanel({ bill }: { bill: Bill }) {
             onChange={(e) => setLetter(e.target.value)}
             rows={18}
             aria-label="Dispute letter"
-            className="w-full rounded-xl border border-slate-300 p-4 font-mono text-sm leading-relaxed focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl border border-rule bg-paper p-4 font-mono text-sm leading-relaxed focus:border-ink focus:outline-none"
           />
           <div className="mt-3 flex gap-3">
             <SecondaryButton onClick={copy}>{copied ? "Copied!" : "Copy"}</SecondaryButton>
@@ -101,7 +94,7 @@ function SecondaryButton(props: { onClick: () => void; children: React.ReactNode
     <button
       type="button"
       onClick={props.onClick}
-      className="flex-1 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-50 sm:flex-none"
+      className="btn btn-secondary flex-1 py-2 text-sm sm:flex-none"
     >
       {props.children}
     </button>

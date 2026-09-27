@@ -17,8 +17,8 @@ export function PracticeView() {
   if (bill === null) {
     return (
       <div className="text-center">
-        <p className="text-slate-600">Check a bill first, then practice the call.</p>
-        <Link href="/" className="mt-4 inline-block font-medium text-emerald-700 hover:underline">
+        <p className="text-ink-soft">Check a bill first, then practice the call.</p>
+        <Link href="/" className="mt-4 inline-block font-semibold underline underline-offset-4">
           ← Upload a bill
         </Link>
       </div>
@@ -34,22 +34,22 @@ function Practice({ bill }: { bill: Bill }) {
 
   return (
     <div className="space-y-6">
-      <Link href="/results" className="text-sm font-medium text-emerald-700 hover:underline">
+      <Link href="/results" className="text-sm font-semibold underline-offset-4 hover:underline">
         ← Back to results
       </Link>
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Practice the call</h1>
-        <p className="mt-1 text-slate-600">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Practice the call</h1>
+        <p className="mt-2 max-w-2xl text-ink-soft">
           Rehearse with Pat, a billing rep at {bill.provider || "your provider"}, before you call for real.
           You&apos;re disputing about{" "}
-          <span className="font-medium text-slate-900">{formatUsd(analysis.questionableTotal)}</span>.
+          <span className="font-semibold text-money">{formatUsd(analysis.questionableTotal)}</span>.
         </p>
       </header>
-      <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1fr_22rem]">
         <CallPanel dynamicVariables={dynamicVariables} />
         <TalkingPoints points={points} />
       </div>
-      <p className="text-center text-xs text-slate-500">
+      <p className="text-center text-xs text-ink-soft">
         Pat is an AI role-play for practice only. Nothing you say is sent to your provider.
       </p>
     </div>

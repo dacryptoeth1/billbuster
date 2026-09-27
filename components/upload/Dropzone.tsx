@@ -30,12 +30,12 @@ export function Dropzone({ onFile, disabled }: Props) {
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={`flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-6 py-12 text-center transition ${
-          dragging ? "border-emerald-500 bg-emerald-50" : "border-slate-300 bg-white hover:border-slate-400"
+          dragging ? "border-ink bg-highlight/20" : "border-ink/25 bg-paper hover:border-ink/50"
         } disabled:cursor-not-allowed disabled:opacity-60`}
       >
         <UploadIcon />
-        <span className="font-medium">Drop your bill here, or click to browse</span>
-        <span className="text-sm text-slate-500">PDF, PNG, JPG, or WEBP · up to 10 MB</span>
+        <span className="text-lg font-semibold">Drop your bill here, or click to browse</span>
+        <span className="text-sm text-ink-soft">PDF, PNG, JPG, or WEBP · up to 10 MB</span>
       </button>
       <input
         ref={inputRef}
@@ -55,7 +55,7 @@ export function Dropzone({ onFile, disabled }: Props) {
 function UploadIcon() {
   return (
     <svg
-      className="size-10 text-slate-400"
+      className="size-10 text-ink/40"
       fill="none"
       viewBox="0 0 24 24"
       strokeWidth={1.5}

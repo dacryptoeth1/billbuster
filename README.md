@@ -140,7 +140,18 @@ All sample data is fictional. Each bill demonstrates one rule:
 | --------------------------------------- | ------------------------------------------------------ |
 | ![Home page](docs/screenshots/home.png) | ![Mobile results](docs/screenshots/results-mobile.png) |
 
+![Practice the call](docs/screenshots/practice.png)
+
 <!-- TODO: add a screenshot of a generated dispute letter -->
+
+## Design
+
+The idea is "a friend with a red pen who audits your bill." Everything is calm ink on paper, so the red marks stand out:
+
+- The bill is shown as a paper receipt. Flagged lines get a hand-drawn red circle (and a strikethrough for duplicates) that draws itself line by line, while the "Money you could get back" counter ticks up to the total.
+- Plain-English explanations appear as highlighter notes; talking points are sticky notes.
+- Fonts: Bricolage Grotesque (headlines) and Figtree (body). Colors: ink `#15213B`, red pen `#D92D20`, highlighter `#FFE14D`, money green `#0E8A4F`.
+- All motion respects `prefers-reduced-motion`: marks and totals appear instantly.
 
 ## Limitations
 

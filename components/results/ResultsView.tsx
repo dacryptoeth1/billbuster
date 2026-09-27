@@ -5,9 +5,10 @@ import Link from "next/link";
 import { analyzeBill } from "@/lib/flags";
 import { explainItems, useStoredBill } from "@/lib/client";
 import type { Bill } from "@/lib/schema";
-import { SummaryCard } from "./SummaryCard";
-import { LineItemTable } from "./LineItemTable";
+import { BillReceipt } from "./BillReceipt";
+import { MoneyBack } from "./MoneyBack";
 import { LetterPanel } from "./LetterPanel";
+import { scheduleMarks } from "./choreography";
 
 export function ResultsView() {
   const bill = useStoredBill();
@@ -16,8 +17,8 @@ export function ResultsView() {
   if (bill === null) {
     return (
       <div className="text-center">
-        <p className="text-slate-600">No bill to show yet.</p>
-        <Link href="/" className="mt-4 inline-block font-medium text-emerald-700 hover:underline">
+        <p className="text-ink-soft">No bill to show yet.</p>
+        <Link href="/" className="mt-4 inline-block font-semibold underline underline-offset-4">
           ← Upload a bill
         </Link>
       </div>
@@ -28,15 +29,31 @@ export function ResultsView() {
 
 function Results({ bill }: { bill: Bill }) {
   const { flags, questionableTotal } = useMemo(() => analyzeBill(bill), [bill]);
+  const schedule = useMemo(() => scheduleMarks(flags), [flags]);
   const explanations = useExplanations(bill);
+  const firstMark = Math.min(...schedule.lines.values(), schedule.total ?? Infinity);
 
   return (
     <div className="space-y-6">
-      <Link href="/" className="text-sm font-medium text-emerald-700 hover:underline">
+      <Link href="/" className="text-sm font-semibold underline-offset-4 hover:underline">
         ← Check another bill
       </Link>
-      <SummaryCard bill={bill} questionableTotal={questionableTotal} flagCount={flags.length} />
-      <LineItemTable bill={bill} flags={flags} explanations={explanations} />
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
+        <div className="lg:sticky lg:top-6 lg:order-2">
+          <MoneyBack
+            total={questionableTotal}
+            flagCount={flags.length}
+            startsAt={Number.isFinite(firstMark) ? firstMark : 0}
+            endsAt={schedule.endsAt}
+          />
+        </div>
+        <div className="lg:order-1">
+          <BillReceipt bill={bill} flags={flags} schedule={schedule} explanations={explanations} />
+          <p className="mt-3 text-xs text-ink-soft">
+            <span className="highlighter">Highlighted</span> notes explain each charge in plain English.
+          </p>
+        </div>
+      </div>
       {flags.length > 0 && <LetterPanel bill={bill} />}
     </div>
   );
