@@ -35,6 +35,11 @@ export async function draftLetter(bill: Bill, financialAssistance: boolean): Pro
   return (await postJson<{ letter: string }>("/api/letter", { bill, financialAssistance })).letter;
 }
 
+export async function getVoiceSession(): Promise<string> {
+  const res = await fetch("/api/voice-session", { cache: "no-store" });
+  return (await readResponse<{ signedUrl: string }>(res)).signedUrl;
+}
+
 // The current bill lives only in this browser tab's sessionStorage.
 const STORAGE_KEY = "billbuster:bill";
 

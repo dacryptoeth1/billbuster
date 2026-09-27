@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { draftLetter } from "@/lib/client";
 import type { Bill } from "@/lib/schema";
 
@@ -53,14 +54,22 @@ export function LetterPanel({ bill }: { bill: Bill }) {
         Also ask about financial assistance
       </label>
 
-      <button
-        type="button"
-        onClick={generate}
-        disabled={loading}
-        className="mt-4 w-full rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-70 sm:w-auto"
-      >
-        {loading ? "Drafting…" : letter ? "Redraft letter" : "Draft dispute letter"}
-      </button>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+        <button
+          type="button"
+          onClick={generate}
+          disabled={loading}
+          className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-70"
+        >
+          {loading ? "Drafting…" : letter ? "Redraft letter" : "Draft dispute letter"}
+        </button>
+        <Link
+          href="/practice"
+          className="rounded-xl border border-emerald-600 px-6 py-3 text-center font-medium text-emerald-700 transition hover:bg-emerald-50"
+        >
+          Practice the call
+        </Link>
+      </div>
 
       {error && (
         <p role="alert" className="mt-3 text-sm text-red-700">
