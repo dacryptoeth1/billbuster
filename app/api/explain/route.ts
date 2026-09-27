@@ -19,9 +19,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return errorResponse("Invalid line items.", 400);
 
   const { lineItems } = parsed.data;
-  const list = lineItems
-    .map((item, i) => `${i}. [${item.code || "no code"}] ${item.description}`)
-    .join("\n");
+  const list = lineItems.map((item, i) => `${i}. [${item.code || "no code"}] ${item.description}`).join("\n");
 
   const prompt = `Explain each medical bill line item to a patient in ONE short sentence
 at an 8th-grade reading level. Say what the service is and why someone might get it.

@@ -10,7 +10,9 @@ export type LetterInput = {
 
 export function describeFlag(bill: Bill, flag: Flag) {
   const item = flag.lineIndex === null ? null : bill.lineItems[flag.lineIndex];
-  const label = item ? `Line ${flag.lineIndex! + 1}: ${item.code} ${item.description} (${formatUsd(item.charge)})` : "Bill totals";
+  const label = item
+    ? `Line ${flag.lineIndex! + 1}: ${item.code} ${item.description} (${formatUsd(item.charge)})`
+    : "Bill totals";
   return `- ${label} — ${flag.reason}`;
 }
 

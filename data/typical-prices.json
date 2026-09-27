@@ -3,19 +3,55 @@
   "prices": [
     { "code": "99281", "description": "ER visit, minimal", "low": 150, "high": 400, "maxUnits": 1 },
     { "code": "99282", "description": "ER visit, low complexity", "low": 250, "high": 600, "maxUnits": 1 },
-    { "code": "99283", "description": "ER visit, moderate complexity", "low": 400, "high": 1100, "maxUnits": 1 },
+    {
+      "code": "99283",
+      "description": "ER visit, moderate complexity",
+      "low": 400,
+      "high": 1100,
+      "maxUnits": 1
+    },
     { "code": "99284", "description": "ER visit, high complexity", "low": 700, "high": 1900, "maxUnits": 1 },
-    { "code": "99285", "description": "ER visit, highest complexity", "low": 1100, "high": 3200, "maxUnits": 1 },
+    {
+      "code": "99285",
+      "description": "ER visit, highest complexity",
+      "low": 1100,
+      "high": 3200,
+      "maxUnits": 1
+    },
     { "code": "99203", "description": "New patient office visit", "low": 150, "high": 300, "maxUnits": 1 },
-    { "code": "99213", "description": "Established patient office visit", "low": 100, "high": 250, "maxUnits": 1 },
-    { "code": "99214", "description": "Established patient office visit, moderate", "low": 150, "high": 350, "maxUnits": 1 },
+    {
+      "code": "99213",
+      "description": "Established patient office visit",
+      "low": 100,
+      "high": 250,
+      "maxUnits": 1
+    },
+    {
+      "code": "99214",
+      "description": "Established patient office visit, moderate",
+      "low": 150,
+      "high": 350,
+      "maxUnits": 1
+    },
     { "code": "36415", "description": "Routine blood draw", "low": 10, "high": 40, "maxUnits": 1 },
     { "code": "85025", "description": "Complete blood count (CBC)", "low": 20, "high": 80, "maxUnits": 1 },
     { "code": "80048", "description": "Basic metabolic panel", "low": 25, "high": 100, "maxUnits": 1 },
-    { "code": "80053", "description": "Comprehensive metabolic panel", "low": 30, "high": 120, "maxUnits": 1 },
+    {
+      "code": "80053",
+      "description": "Comprehensive metabolic panel",
+      "low": 30,
+      "high": 120,
+      "maxUnits": 1
+    },
     { "code": "80061", "description": "Lipid panel", "low": 30, "high": 120, "maxUnits": 1 },
     { "code": "83036", "description": "Hemoglobin A1c", "low": 25, "high": 90, "maxUnits": 1 },
-    { "code": "84443", "description": "Thyroid stimulating hormone (TSH)", "low": 35, "high": 130, "maxUnits": 1 },
+    {
+      "code": "84443",
+      "description": "Thyroid stimulating hormone (TSH)",
+      "low": 35,
+      "high": 130,
+      "maxUnits": 1
+    },
     { "code": "81001", "description": "Urinalysis", "low": 10, "high": 50, "maxUnits": 1 },
     { "code": "87880", "description": "Rapid strep test", "low": 20, "high": 70, "maxUnits": 1 },
     { "code": "87635", "description": "COVID-19 PCR test", "low": 50, "high": 150, "maxUnits": 1 },
@@ -23,16 +59,46 @@
     { "code": "73610", "description": "Ankle X-ray, 3+ views", "low": 100, "high": 400, "maxUnits": 2 },
     { "code": "72110", "description": "Lower spine X-ray", "low": 150, "high": 450, "maxUnits": 1 },
     { "code": "70450", "description": "CT head without contrast", "low": 500, "high": 2500, "maxUnits": 1 },
-    { "code": "74177", "description": "CT abdomen and pelvis with contrast", "low": 1200, "high": 4500, "maxUnits": 1 },
-    { "code": "72148", "description": "MRI lower spine without contrast", "low": 900, "high": 3500, "maxUnits": 1 },
+    {
+      "code": "74177",
+      "description": "CT abdomen and pelvis with contrast",
+      "low": 1200,
+      "high": 4500,
+      "maxUnits": 1
+    },
+    {
+      "code": "72148",
+      "description": "MRI lower spine without contrast",
+      "low": 900,
+      "high": 3500,
+      "maxUnits": 1
+    },
     { "code": "76700", "description": "Abdominal ultrasound", "low": 300, "high": 1200, "maxUnits": 1 },
     { "code": "93000", "description": "Electrocardiogram (ECG)", "low": 40, "high": 200, "maxUnits": 1 },
     { "code": "96360", "description": "IV fluids, first hour", "low": 150, "high": 500, "maxUnits": 1 },
     { "code": "96374", "description": "IV push medication", "low": 150, "high": 450, "maxUnits": 1 },
-    { "code": "J1885", "description": "Ketorolac injection, per 15 mg", "low": 10, "high": 60, "maxUnits": 4 },
-    { "code": "J2405", "description": "Ondansetron injection, per 1 mg", "low": 5, "high": 50, "maxUnits": 8 },
+    {
+      "code": "J1885",
+      "description": "Ketorolac injection, per 15 mg",
+      "low": 10,
+      "high": 60,
+      "maxUnits": 4
+    },
+    {
+      "code": "J2405",
+      "description": "Ondansetron injection, per 1 mg",
+      "low": 5,
+      "high": 50,
+      "maxUnits": 8
+    },
     { "code": "90471", "description": "Vaccine administration", "low": 20, "high": 60, "maxUnits": 1 },
-    { "code": "12002", "description": "Simple laceration repair, 2.6-7.5 cm", "low": 250, "high": 900, "maxUnits": 1 },
+    {
+      "code": "12002",
+      "description": "Simple laceration repair, 2.6-7.5 cm",
+      "low": 250,
+      "high": 900,
+      "maxUnits": 1
+    },
     { "code": "29125", "description": "Short arm splint", "low": 150, "high": 500, "maxUnits": 1 }
   ]
 }

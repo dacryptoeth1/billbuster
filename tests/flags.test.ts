@@ -58,9 +58,7 @@ describe("analyzeBill", () => {
 
   it("flags patientOwes that doesn't match total minus insurance", () => {
     const { flags } = analyzeBill(withItems({ patientOwes: 150 }));
-    expect(flags).toEqual([
-      expect.objectContaining({ type: "math", estimatedOvercharge: 50 }),
-    ]);
+    expect(flags).toEqual([expect.objectContaining({ type: "math", estimatedOvercharge: 50 })]);
   });
 
   it("flags quantity anomalies and prorates the overcharge", () => {

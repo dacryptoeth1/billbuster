@@ -6,9 +6,7 @@ export const LineItemSchema = z.object({
   description: z.string(),
   quantity: z.number().describe("Units billed; use 1 if not shown"),
   charge: z.number().describe("Total dollar charge for this line (not unit price)"),
-  dateOfService: z
-    .string()
-    .describe("YYYY-MM-DD for this line if shown, otherwise empty string"),
+  dateOfService: z.string().describe("YYYY-MM-DD for this line if shown, otherwise empty string"),
 });
 
 export const BillSchema = z.object({
