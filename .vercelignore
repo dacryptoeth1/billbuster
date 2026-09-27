@@ -1,0 +1,5 @@
+# Never upload local secrets; production keys live in Vercel env vars.
+.env*
+!.env.example
+.next
+node_modules

@@ -124,6 +124,21 @@ The variable names in the prompt (`provider_name`, `account_ref`, `date_of_servi
 | `npm run build`   | Production build                                                                                                   |
 | `npm run samples` | Re-render `public/samples/*.png` from `lib/samples.ts` (needs Chrome or Edge; set `CHROME_PATH` if it isn't found) |
 
+## Deploy (Vercel)
+
+Live: **https://billbuster-ecru.vercel.app**
+
+```bash
+npx vercel login                      # once
+npx vercel link --yes --project billbuster
+npx vercel env add GEMINI_API_KEY production       # paste the value when prompted
+npx vercel env add ELEVENLABS_API_KEY production
+npx vercel env add ELEVENLABS_AGENT_ID production
+npx vercel deploy --prod
+```
+
+Keys live only in Vercel's environment variables; `.vercelignore` keeps local `.env*` files out of the upload. If the ElevenLabs agent has a host allowlist, add the production domain to it.
+
 ## Sample bills
 
 All sample data is fictional. Each bill demonstrates one rule:
