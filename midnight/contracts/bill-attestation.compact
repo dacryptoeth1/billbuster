@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// BillBuster bill attestation.
+//
+// Proves "this medical bill was checked, and here is the verdict" without
+// revealing the diagnosis, provider, or line items. The bill summary lives in
+// a private witness; only a hiding commitment, a boolean verdict, and a coarse
+// overcharge bucket are written to the public ledger.
+
+pragma language_version >= 0.20;
+
+import CompactStandardLibrary;
+
+// Summary produced locally by the BillBuster checker. Never leaves the device.
+struct BillSummary {
+  billDigest: Bytes<32>;     // hash of the normalized bill contents
+  totalCents: Uint<64>;      // total billed amount
+  flaggedCents: Uint<64>;    // amount flagged as likely erroneous
+}
+
+export enum OverchargeBucket {
+  NONE,      // no errors found
+  LOW,       // flagged < 5% of total
+  MEDIUM,    // 5% <= flagged < 20%
+  HIGH       // flagged >= 20%
+}
+
+export ledger attested: Boolean;
+export ledger commitment: Bytes<32>;
+export ledger hasOvercharge: Boolean;
+export ledger bucket: OverchargeBucket;
+export ledger attestationCount: Counter;
+
+// Private inputs, supplied by the TypeScript driver at proving time.
+witness billSummary(): BillSummary;
+witness commitmentRandomness(): Bytes<32>;
+
+// Pure helper: classify flagged/total without division.
+circuit classify(total: Uint<64>, flagged: Uint<64>): OverchargeBucket {
+  if (flagged == 0) {
+    return OverchargeBucket.NONE;
+  }
+  if (flagged * 100 >= total * 20) {
+    return OverchargeBucket.HIGH;
+  }
+  if (flagged * 100 >= total * 5) {
+    return OverchargeBucket.MEDIUM;
+  }
+  return OverchargeBucket.LOW;
+}
+
+export circuit attestBill(): [] {
+  assert(!attested, "This contract already holds an attestation");
+
+  const bill = billSummary();
+  assert(bill.totalCents > 0, "Bill total must be positive");
+  assert(bill.flaggedCents <= bill.totalCents, "Flagged amount exceeds bill total");
+
+  const result = classify(bill.totalCents, bill.flaggedCents);
+
+  // Hiding commitment: the random value keeps low-entropy bills unguessable.
+  commitment = disclose(persistentCommit<BillSummary>(bill, commitmentRandomness()));
+  bucket = disclose(result);
+  hasOvercharge = disclose(result != OverchargeBucket.NONE);
+  attested = true;
+  attestationCount.increment(1);
+}

@@ -1,0 +1,31 @@
+name: midnight-compile
+
+on:
+  push:
+    paths:
+      - "midnight/**"
+      - ".github/workflows/midnight-compile.yml"
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Compact
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Pin compiler 0.31.1
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          compact update 0.31.1
+          compact --version
+          compact compile --version
+          compact compile --language-version || true
+      - name: Compile bill-attestation
+        working-directory: midnight
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          compact compile contracts/bill-attestation.compact managed/bill-attestation
+          find managed -type f | sort
