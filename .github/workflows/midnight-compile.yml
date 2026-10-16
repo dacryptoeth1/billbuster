@@ -2,9 +2,7 @@ name: midnight-compile
 
 on:
   push:
-    paths:
-      - "midnight/**"
-      - ".github/workflows/midnight-compile.yml"
+  pull_request:
   workflow_dispatch:
 
 jobs:
