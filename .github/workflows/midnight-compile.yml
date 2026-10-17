@@ -33,8 +33,6 @@ jobs:
       - name: Install test dependencies
         working-directory: midnight
         run: npm install --no-audit --no-fund
-      - name: Probe generated API
+      - name: Test contract
         working-directory: midnight
-        run: |
-          head -40 managed/bill-attestation/contract/index.js
-          cat managed/bill-attestation/contract/index.d.ts
+        run: npm test
