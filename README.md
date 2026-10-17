@@ -46,6 +46,59 @@ lib/flags (pure TypeScript rules) ──► questionable total
           └─ ElevenLabs agent "Pat", given the flagged items as dynamic variables
 ```
 
+## Privacy and Midnight
+
+A medical bill is about as sensitive as data gets: it reveals diagnoses, providers, and dates. BillBuster is built so that checking a bill never requires publishing it.
+
+- **Bill data stays private.** The bill is read in memory, analysed by deterministic rules, and kept only in the browser tab's `sessionStorage`. Nothing is stored server-side.
+- **Only a commitment and a bucket go on-chain.** The [`bill-attestation`](midnight/contracts/bill-attestation.compact) Compact contract lets a user prove "this bill was checked, and here is the verdict" without revealing what is on it. The bill summary (digest, total, flagged amount) is a **private witness**. The public ledger stores only:
+  - a hiding commitment to the summary (`persistentCommit` with private randomness, so low-entropy bills can't be guessed),
+  - `hasOvercharge`, a boolean,
+  - `bucket`, a coarse `NONE / LOW / MEDIUM / HIGH` overcharge band (flagged < 5%, 5-20%, >= 20% of the total).
+- **Zero-knowledge guarantees.** The circuit asserts the total is positive and the flagged amount does not exceed it, then derives the bucket from the private numbers. A verifier learns the bucket is correct without learning the amounts.
+
+### Architecture
+
+```
+Browser (private)                         Midnight (public)
+  bill -> rules engine (lib/flags)
+  BillSummary {digest, total, flagged}
+        |  private witness
+        v
+  attestBill() circuit  ---- proof ---->  ledger: commitment, hasOvercharge,
+  (Compact, proven locally)                        bucket, attested, attestationCount
+```
+
+The off-chain app (Next.js, Gemini, ElevenLabs) and the on-chain attestation are separate layers joined by the `BillSummary` the rules engine produces.
+
+### Compile and test the contract (for judges)
+
+The CI workflow [`midnight-compile`](.github/workflows/midnight-compile.yml) compiles and tests the contract on every push. To reproduce locally (Linux, macOS or WSL; Node 22):
+
+```bash
+# install the Compact toolchain, then pin the compiler
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+compact update 0.31.1
+
+cd midnight
+npm install
+npm run compile      # compact compile contracts/bill-attestation.compact managed/bill-attestation
+npm test             # simulates attestBill against the compiled contract
+```
+
+The tests ([`midnight/test/bill-attestation.test.mjs`](midnight/test/bill-attestation.test.mjs)) run the compiled circuit in-process and check the `NONE`, `LOW`, `MEDIUM` and `HIGH` buckets (including the 5% and 20% boundaries), that the commitment hides the bill (different randomness gives a different commitment), and the invalid cases: zero total, flagged amount above total, and a second attestation on the same contract.
+
+> Note: on Windows, `compact` may resolve to the built-in disk-compression tool. Use WSL.
+
+## Wave 2 progress
+
+- Wrote the `bill-attestation` Compact contract (private witness, hiding commitment, overcharge bucket).
+- CI compiles it with a pinned compiler (0.31.1) on every push.
+- Added an in-process simulation test suite (11 tests: all four buckets, boundaries, commitment hiding, three invalid-input cases) that runs in CI.
+- Documented the privacy model and architecture above.
+
+Not done yet: deploying the contract to a Midnight network, wiring the Next.js app to generate proofs and submit attestations from a wallet, and a verifier page. The web app currently runs without any chain connection.
+
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind CSS

@@ -10,4 +10,9 @@ Compile (Linux/macOS/WSL, compiler 0.31.1):
     compact update 0.31.1
     compact compile contracts/bill-attestation.compact managed/bill-attestation
 
-CI compiles the contract on every push. License: Apache-2.0.
+Test (simulates `attestBill` for every bucket and the invalid inputs):
+
+    npm install
+    npm test
+
+CI compiles and tests the contract on every push. License: Apache-2.0.
