@@ -27,3 +27,14 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           compact compile contracts/bill-attestation.compact managed/bill-attestation
           find managed -type f | sort
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install test dependencies
+        working-directory: midnight
+        run: npm install --no-audit --no-fund
+      - name: Probe generated API
+        working-directory: midnight
+        run: |
+          head -40 managed/bill-attestation/contract/index.js
+          cat managed/bill-attestation/contract/index.d.ts

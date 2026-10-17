@@ -1,0 +1,17 @@
+{
+  "name": "billbuster-midnight",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "compile": "compact compile contracts/bill-attestation.compact managed/bill-attestation",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.20.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}
