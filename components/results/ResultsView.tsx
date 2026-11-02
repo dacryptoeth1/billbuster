@@ -8,6 +8,7 @@ import type { Bill } from "@/lib/schema";
 import { BillReceipt } from "./BillReceipt";
 import { MoneyBack } from "./MoneyBack";
 import { LetterPanel } from "./LetterPanel";
+import { PayPanel } from "./PayPanel";
 import { scheduleMarks } from "./choreography";
 
 export function ResultsView() {
@@ -55,6 +56,7 @@ function Results({ bill }: { bill: Bill }) {
         </div>
       </div>
       {flags.length > 0 && <LetterPanel bill={bill} />}
+      <PayPanel bill={bill} questionableTotal={questionableTotal} />
     </div>
   );
 }

@@ -167,6 +167,15 @@ The rest of the app works without this. If it isn't configured, the practice pag
 
 The variable names in the prompt (`provider_name`, `account_ref`, `date_of_service`, `amount_owed`, `questionable_total`, `flagged_items`) must match `buildDynamicVariables` in `lib/practice.ts`. A unit test checks this.
 
+### Simulated payment (optional)
+
+The results page can run a test payment of the estimated corrected total through [PayPal's sandbox](https://developer.paypal.com/tools/sandbox/). It's a simulation: no real money moves, and it doesn't settle the bill with the provider. The server refuses any PayPal host other than the sandbox.
+
+1. In the [PayPal developer dashboard](https://developer.paypal.com/dashboard/applications), switch to **Sandbox** and copy your app's client ID and secret.
+2. Copy `.env.example` to `.env` and fill in `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`. Keep `PAYPAL_BASE_URL` as it is.
+3. Run `npm run paypal:check`, which should print `PayPal auth OK`, then restart `npm run dev`.
+4. To approve a test payment, log in on PayPal's page with a sandbox **personal** account from the dashboard.
+
 ### Other commands
 
 | Command           | What it does                                                                                                       |

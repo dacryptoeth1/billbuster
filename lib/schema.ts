@@ -35,3 +35,13 @@ export type Flag = {
   reason: string;
   estimatedOvercharge: number;
 };
+
+/** What PayPal's sandbox reported for a simulated payment. Never a real payment. */
+export type TestPaymentResult = {
+  orderId: string;
+  /** PayPal's capture status, or PENDING if PayPal hasn't finished processing. */
+  status: "COMPLETED" | "DECLINED" | "PARTIALLY_REFUNDED" | "PENDING" | "REFUNDED" | "FAILED";
+  captureId: string | null;
+  /** US dollars, as PayPal reported them. */
+  amount: number | null;
+};

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import type { Bill } from "@/lib/schema";
+import type { Bill, TestPaymentResult } from "@/lib/schema";
 
 /** Browser-side API helpers. Each throws an Error with a user-friendly message. */
 
@@ -65,6 +65,34 @@ export async function getVoiceSession(): Promise<string> {
   return (await readResponse<{ signedUrl: string }>(res)).signedUrl;
 }
 
+// PayPal's docs don't promise an order ID on the return URL, so the tab remembers it.
+const TEST_ORDER_KEY = "billbuster:test-order";
+
+/** Creates a sandbox order, remembers it for the return page, and returns PayPal's approval URL. */
+export async function startTestPayment(bill: Bill): Promise<string> {
+  const { orderId, approvalUrl } = await postJson<{ orderId: string; approvalUrl: string }>(
+    "/api/paypal/orders",
+    { bill },
+  );
+  sessionStorage.setItem(TEST_ORDER_KEY, orderId);
+  return approvalUrl;
+}
+
+// One in-flight capture per order, for the same reason as explainRequests above.
+const captureRequests = new Map<string, Promise<TestPaymentResult>>();
+
+export function captureTestPayment(orderId: string): Promise<TestPaymentResult> {
+  let request = captureRequests.get(orderId);
+  if (!request) {
+    request = postJson<{ result: TestPaymentResult }>(
+      `/api/paypal/orders/${encodeURIComponent(orderId)}/capture`,
+      {},
+    ).then((r) => r.result);
+    captureRequests.set(orderId, request);
+  }
+  return request;
+}
+
 // The current bill lives only in this browser tab's sessionStorage.
 const STORAGE_KEY = "billbuster:bill";
 
@@ -73,6 +101,15 @@ export function saveBill(bill: Bill) {
 }
 
 const noopSubscribe = () => () => {};
+
+/** The remembered sandbox order: `undefined` while rendering on the server, `null` if none. */
+export function useTestOrderId(): string | null | undefined {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => sessionStorage.getItem(TEST_ORDER_KEY),
+    () => undefined,
+  );
+}
 
 /**
  * The saved bill: `undefined` while rendering on the server, `null` if none is saved.
