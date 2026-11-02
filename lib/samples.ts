@@ -1,7 +1,7 @@
 import type { Bill } from "@/lib/schema";
 
 /**
- * Three FAKE bills used for the demo. Names, providers, and account numbers are invented.
+ * FAKE bills used for the demo. Names, providers, and account numbers are invented.
  * The PNGs in /public/samples are rendered from this data (see scripts/render-samples.ts),
  * so this also serves as the known-good extraction if Gemini is unavailable.
  */
@@ -166,6 +166,71 @@ export const SAMPLE_BILLS: SampleBill[] = [
       totalBilled: 3375,
       insurancePaid: 2100,
       patientOwes: 1275,
+    },
+  },
+  {
+    id: "urgent-care",
+    title: "Urgent care",
+    blurb: "One of each error: duplicate, quantity, price, and math",
+    image: "/samples/urgent-care.png",
+    bill: {
+      provider: "Nowhere Falls Urgent Care (Fictional)",
+      patientRef: "SAMPLE-20417",
+      dateOfService: "2026-10-06",
+      lineItems: [
+        {
+          code: "99214",
+          description: "Office visit, moderate complexity",
+          quantity: 1,
+          charge: 280,
+          dateOfService: "2026-10-06",
+        },
+        {
+          code: "87880",
+          description: "Rapid strep test",
+          quantity: 1,
+          charge: 45,
+          dateOfService: "2026-10-06",
+        },
+        {
+          code: "85025",
+          description: "Complete blood count w/ diff",
+          quantity: 1,
+          charge: 60,
+          dateOfService: "2026-10-06",
+        },
+        {
+          code: "85025",
+          description: "Complete blood count w/ diff",
+          quantity: 1,
+          charge: 60,
+          dateOfService: "2026-10-06",
+        },
+        {
+          code: "80053",
+          description: "Comprehensive metabolic panel",
+          quantity: 1,
+          charge: 420,
+          dateOfService: "2026-10-06",
+        },
+        {
+          code: "J2405",
+          description: "Ondansetron inj, per 1 mg",
+          quantity: 24,
+          charge: 240,
+          dateOfService: "2026-10-06",
+        },
+        {
+          code: "36415",
+          description: "Venipuncture, routine",
+          quantity: 1,
+          charge: 25,
+          dateOfService: "2026-10-06",
+        },
+      ],
+      totalBilled: 1205,
+      insurancePaid: 430,
+      patientOwes: 775,
     },
   },
 ];

@@ -19,7 +19,7 @@ export function SamplePicker({ onPick, disabled, activeId }: Props) {
   return (
     <section>
       <h2 className="mb-4 font-display text-xl font-bold">No bill handy? Grab a sample.</h2>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {SAMPLE_BILLS.map((sample, i) => (
           <button
             key={sample.id}
