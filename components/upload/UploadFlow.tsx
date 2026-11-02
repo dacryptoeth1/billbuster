@@ -7,7 +7,7 @@ import { FilePreview, type Preview } from "./FilePreview";
 import { SamplePicker } from "./SamplePicker";
 import { ReadingLabel } from "./ReadingLabel";
 import { Alert } from "@/components/Alert";
-import { extractBill, saveBill } from "@/lib/client";
+import { extractBill, readSample, saveBill, type BillSource } from "@/lib/client";
 import type { SampleBill } from "@/lib/samples";
 import type { Bill } from "@/lib/schema";
 
@@ -28,8 +28,8 @@ export function UploadFlow() {
     setStatus({ state: "idle" });
   }
 
-  function showResults(bill: Bill) {
-    saveBill(bill);
+  function showResults(bill: Bill, source: BillSource) {
+    saveBill(bill, source);
     router.push("/results");
   }
 
@@ -37,7 +37,7 @@ export function UploadFlow() {
   async function analyze(file: File) {
     setStatus({ state: "reading" });
     try {
-      showResults(await extractBill(file));
+      showResults(await extractBill(file), "ai");
     } catch (err) {
       setStatus({ state: "error", message: messageFrom(err) });
     }
@@ -45,21 +45,16 @@ export function UploadFlow() {
 
   async function pickSample(sample: SampleBill) {
     setStatus({ state: "reading", sampleId: sample.id });
-    try {
-      const res = await fetch(sample.image);
-      if (!res.ok) throw new Error(`Sample image returned ${res.status}`);
-      const file = new File([await res.blob()], `${sample.id}.png`, { type: "image/png" });
+    // Samples must always work on stage: readSample falls back to the known-good extraction.
+    const { bill, source } = await readSample(sample, (file) => {
       selectFile(file);
       setStatus({ state: "reading", sampleId: sample.id });
-      showResults(await extractBill(file, SAMPLE_TIMEOUT_MS));
+      return extractBill(file, SAMPLE_TIMEOUT_MS);
+    });
+    try {
+      showResults(bill, source);
     } catch (err) {
-      // Samples must always work on stage: fall back to the known-good extraction.
-      console.warn("Sample extraction failed; using pre-extracted data.", err);
-      try {
-        showResults(sample.bill);
-      } catch (fallbackErr) {
-        setStatus({ state: "error", message: messageFrom(fallbackErr) });
-      }
+      setStatus({ state: "error", message: messageFrom(err) });
     }
   }
 

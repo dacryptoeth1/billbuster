@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { analyzeBill } from "@/lib/flags";
-import { explainItems, useStoredBill } from "@/lib/client";
+import { explainItems, useBillSource, useStoredBill } from "@/lib/client";
 import type { Bill } from "@/lib/schema";
 import { BillReceipt } from "./BillReceipt";
+import { BillSourceLabel } from "./BillSourceLabel";
 import { MoneyBack } from "./MoneyBack";
 import { LetterPanel } from "./LetterPanel";
 import { PayPanel } from "./PayPanel";
@@ -33,12 +34,16 @@ function Results({ bill }: { bill: Bill }) {
   const schedule = useMemo(() => scheduleMarks(flags), [flags]);
   const explanations = useExplanations(bill);
   const firstMark = Math.min(...schedule.lines.values(), schedule.total ?? Infinity);
+  const source = useBillSource();
 
   return (
     <div className="space-y-6">
-      <Link href="/" className="text-sm font-semibold underline-offset-4 hover:underline">
-        ← Check another bill
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Link href="/" className="text-sm font-semibold underline-offset-4 hover:underline">
+          ← Check another bill
+        </Link>
+        {source && <BillSourceLabel source={source} />}
+      </div>
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="lg:sticky lg:top-6 lg:order-2">
           <MoneyBack

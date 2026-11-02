@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import type { SampleBill } from "@/lib/samples";
 import type { Bill, TestPaymentResult } from "@/lib/schema";
 
 /** Browser-side API helpers. Each throws an Error with a user-friendly message. */
@@ -96,11 +97,44 @@ export function captureTestPayment(orderId: string): Promise<TestPaymentResult> 
 // The current bill lives only in this browser tab's sessionStorage.
 const STORAGE_KEY = "billbuster:bill";
 
-export function saveBill(bill: Bill) {
+const SOURCE_KEY = "billbuster:bill-source";
+
+/** Which path produced the current results. */
+export type BillSource = "ai" | "saved-sample";
+
+export function saveBill(bill: Bill, source: BillSource) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(bill));
+  sessionStorage.setItem(SOURCE_KEY, source);
+}
+
+/** Null if the stored bill predates labels, since its path can't be known. */
+export function readBillSource(): BillSource | null {
+  const source = sessionStorage.getItem(SOURCE_KEY);
+  return source === "ai" || source === "saved-sample" ? source : null;
+}
+
+/** Reads a sample with `extract`, falling back to its known-good data if anything fails. */
+export async function readSample(
+  sample: SampleBill,
+  extract: (file: File) => Promise<Bill>,
+): Promise<{ bill: Bill; source: BillSource }> {
+  try {
+    const res = await fetch(sample.image);
+    if (!res.ok) throw new Error(`Sample image returned ${res.status}`);
+    const file = new File([await res.blob()], `${sample.id}.png`, { type: "image/png" });
+    return { bill: await extract(file), source: "ai" };
+  } catch (err) {
+    console.warn("Sample extraction failed; using pre-extracted data.", err);
+    return { bill: sample.bill, source: "saved-sample" };
+  }
 }
 
 const noopSubscribe = () => () => {};
+
+/** The saved bill's source: `undefined` while rendering on the server. */
+export function useBillSource(): BillSource | null | undefined {
+  return useSyncExternalStore(noopSubscribe, readBillSource, () => undefined);
+}
 
 /** The remembered sandbox order: `undefined` while rendering on the server, `null` if none. */
 export function useTestOrderId(): string | null | undefined {

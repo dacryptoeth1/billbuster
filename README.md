@@ -208,7 +208,7 @@ Keys live only in Vercel's environment variables; `.vercelignore` keeps local `.
 
 ## Sample bills
 
-All sample data is fictional. Click one under **"No bill handy? Grab a sample."** on the home page, or upload its PNG from `public/samples/`. If the AI call fails, clicking a sample falls back to saved data; uploading a PNG doesn't, so use an upload to test the AI itself.
+All sample data is fictional. Click one under **"No bill handy? Grab a sample."** on the home page, or upload its PNG from `public/samples/`. If the AI call fails or takes over 25 seconds, clicking a sample falls back to saved data; uploading a PNG doesn't. The results page always says which path was used: "Read by AI" or "Using saved sample data".
 
 Each of the first three demonstrates one rule, and Urgent care demonstrates all four:
 
