@@ -43,3 +43,14 @@ next-env.d.ts
 
 # Devpost media (generated)
 /media
+
+# private keys
+.keys
+*.key
+
+# video files (too large for the repo)
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.avi
