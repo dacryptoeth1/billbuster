@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Alert } from "@/components/Alert";
+import { HeartbeatCheck } from "@/components/medical/HeartbeatCheck";
 import { captureTestPayment, useTestOrderId } from "@/lib/client";
 import { formatUsd } from "@/lib/money";
 import type { TestPaymentResult } from "@/lib/schema";
@@ -48,6 +49,7 @@ function TestReceipt({ result }: { result: TestPaymentResult }) {
   return (
     <div className="mx-auto max-w-xl">
       <section className="paper rounded-2xl p-6 sm:p-8">
+        {result.status === "COMPLETED" && <HeartbeatCheck className="mb-3 block" />}
         <p className="text-sm font-semibold text-pen">Simulation: no real money moved</p>
         <h1 className="mt-1 font-display text-3xl font-extrabold">
           {result.status === "COMPLETED" ? "Test payment receipt" : "Test payment not completed"}

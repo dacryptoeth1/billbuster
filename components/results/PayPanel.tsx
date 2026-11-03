@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Alert } from "@/components/Alert";
+import { BandageCheck } from "@/components/medical/BandageCheck";
 import { startTestPayment } from "@/lib/client";
 import { correctedTotal } from "@/lib/flags";
 import { formatUsd } from "@/lib/money";
@@ -38,6 +39,7 @@ export function PayPanel({ bill, questionableTotal }: Props) {
         <>
           <p className="mt-1 text-ink-soft">
             Estimated corrected total: <span className="font-semibold text-ink">{formatUsd(total)}</span>
+            {questionableTotal > 0 && <BandageCheck className="-my-1 ml-2 inline-block align-middle" />}
           </p>
           <p className="mt-1 text-sm text-ink-soft">
             This is a simulation using PayPal&apos;s sandbox and test accounts. No real money moves, and your

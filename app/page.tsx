@@ -1,10 +1,12 @@
 import { UploadFlow } from "@/components/upload/UploadFlow";
 import { PenCircle } from "@/components/marks/PenCircle";
+import { FirstAidBox } from "@/components/medical/FirstAidBox";
 
 export default function Home() {
   return (
     <div className="mx-auto max-w-2xl">
       <section className="mb-10 text-center sm:mb-12">
+        <FirstAidBox className="mx-auto mb-3 block size-16 sm:size-20" />
         <h1 className="font-display text-4xl leading-[1.15] font-extrabold tracking-tight text-balance sm:text-6xl">
           Your medical bill has{" "}
           <span className="whitespace-nowrap">

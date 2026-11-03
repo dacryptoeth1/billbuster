@@ -77,7 +77,7 @@ export function UploadFlow() {
             {reading ? <ReadingLabel /> : "Check my bill"}
           </button>
           {/* Button sits above the preview so its status is visible without scrolling. */}
-          <FilePreview preview={preview} />
+          <FilePreview preview={preview} listening={reading} />
         </div>
       )}
 
