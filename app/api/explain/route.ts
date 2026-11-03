@@ -3,6 +3,8 @@ import { generateJson } from "@/lib/gemini";
 import { LineItemSchema, type LineItem } from "@/lib/schema";
 import { errorResponse } from "@/lib/api";
 
+export const maxDuration = 60;
+
 const RequestSchema = z.object({ lineItems: z.array(LineItemSchema).min(1).max(100) });
 
 const ResponseSchema = z.object({

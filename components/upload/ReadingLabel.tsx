@@ -1,7 +1,9 @@
+import { ListeningHeartbeat } from "@/components/medical/ListeningHeartbeat";
+
 export function ReadingLabel() {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="size-4 animate-spin rounded-full border-2 border-current/40 border-t-current" />
+      <ListeningHeartbeat className="h-5 w-[3.75rem] shrink-0" />
       Reading your bill…
     </span>
   );

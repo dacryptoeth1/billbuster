@@ -136,11 +136,187 @@ body {
   }
 }
 
+/*
+ * Medical marks. Each element's un-animated styles are its finished look, and all motion
+ * lives in the block below, so reduced-motion visitors simply get the static drawing.
+ */
+.med-floater {
+  opacity: 0.06;
+  transform: rotate(var(--med-tilt, 0deg));
+}
+.med-pulse-ring {
+  border: 1px solid color-mix(in srgb, var(--color-pen) 28%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero first aid box */
+  .med-box {
+    animation: med-bob 3.6s ease-in-out infinite;
+  }
+  .med-box-shadow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: med-shadow 3.6s ease-in-out infinite;
+  }
+  .med-cross {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: med-cross-pulse 1.8s ease-in-out infinite;
+  }
+
+  /* Stethoscope and ECG while the bill is being read */
+  .med-chestpiece {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: med-listen 0.9s ease-in-out infinite;
+  }
+  .med-trace {
+    stroke-dasharray: 0.28 0.72;
+    animation: med-sweep 1.8s linear infinite;
+  }
+
+  /* Flagged rows: arrive with the pen, pulse a few times, then rest */
+  .med-pulse-ring {
+    animation: med-appear 300ms ease-out var(--med-delay, 0ms) backwards;
+  }
+  .med-pulse-ring::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border: 2px solid var(--color-pen);
+    border-radius: inherit;
+    opacity: 0;
+    animation: med-ring 1.8s ease-out var(--med-delay, 0ms) 3;
+  }
+
+  /* Bandage sticks on once it's on screen */
+  .med-bandage:not(.med-seen) {
+    opacity: 0;
+  }
+  .med-bandage.med-seen {
+    transform-origin: center;
+    animation: med-stick 450ms cubic-bezier(0.3, 1.5, 0.6, 1) backwards;
+  }
+  .med-bandage-check {
+    stroke-dasharray: 1;
+  }
+  .med-bandage.med-seen .med-bandage-check {
+    animation: med-draw 300ms ease-out 350ms backwards;
+  }
+
+  /* Receipt: heartbeat, then checkmark */
+  .med-hb-disc {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: med-disc 400ms cubic-bezier(0.3, 1.5, 0.6, 1) 1100ms backwards;
+  }
+  .med-hb-trace {
+    stroke-dasharray: 1;
+    animation: med-hb-trace 1400ms ease-in-out both;
+  }
+  .med-hb-check {
+    stroke-dasharray: 1;
+    animation: med-draw 350ms ease-out 1200ms backwards;
+  }
+
+  /* Background drift (each floater sets its own duration and start point) */
+  .med-floater {
+    animation: med-float 18s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes med-bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes med-shadow {
+  50% {
+    transform: scaleX(0.86);
+    opacity: 0.08;
+  }
+}
+@keyframes med-cross-pulse {
+  50% {
+    transform: scale(1.09);
+    opacity: 0.78;
+  }
+}
+@keyframes med-listen {
+  50% {
+    transform: scale(0.82);
+  }
+}
+@keyframes med-sweep {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: -0.28;
+  }
+}
+@keyframes med-appear {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes med-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.012, 1.07);
+    opacity: 0;
+  }
+}
+@keyframes med-stick {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-14deg);
+  }
+}
+@keyframes med-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes med-disc {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+@keyframes med-hb-trace {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  85%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes med-float {
+  from {
+    transform: translateY(0) rotate(var(--med-tilt, 0deg));
+  }
+  to {
+    transform: translateY(-16px) rotate(calc(var(--med-tilt, 0deg) + 10deg));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
     animation-delay: 0ms !important;
     transition-duration: 1ms !important;
   }

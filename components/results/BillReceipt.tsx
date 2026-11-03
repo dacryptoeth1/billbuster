@@ -3,6 +3,7 @@ import { formatUsd } from "@/lib/money";
 import { Receipt } from "@/components/Receipt";
 import { PenCircle } from "@/components/marks/PenCircle";
 import { PenStrike } from "@/components/marks/PenStrike";
+import { PulseRing } from "@/components/medical/PulseRing";
 import type { MarkSchedule } from "./choreography";
 import { PenNotes } from "./PenNotes";
 
@@ -33,7 +34,8 @@ export function BillReceipt({ bill, flags, schedule, explanations }: Props) {
           const delay = schedule.lines.get(i);
           const isDuplicate = rowFlags.some((f) => f.type === "duplicate");
           return (
-            <li key={i} className="border-b border-dashed border-rule py-3 last:border-b-0">
+            <li key={i} className="relative border-b border-dashed border-rule py-3 last:border-b-0">
+              {delay !== undefined && <PulseRing delay={delay} />}
               <div className="grid grid-cols-[1fr_auto] items-start gap-x-4 gap-y-1">
                 <div>
                   <p className="font-medium">{item.description}</p>

@@ -25,6 +25,15 @@ export function analyzeBill(bill: Bill): Analysis {
   return { flags, questionableTotal: questionableTotal(bill, flags) };
 }
 
+/**
+ * The amount due minus the questionable dollars, floored at 0. Null when the bill has no
+ * amount due: extraction records a missing amount as 0, so the two look the same.
+ */
+export function correctedTotal(bill: Bill, questionable: number): number | null {
+  if (!(bill.patientOwes > 0)) return null;
+  return Math.max(0, toCents(bill.patientOwes - questionable));
+}
+
 function questionableTotal(bill: Bill, flags: Flag[]) {
   // Per line, count only the largest overcharge, capped at what the line actually costs.
   const perLine = new Map<number, number>();

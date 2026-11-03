@@ -49,6 +49,20 @@ describe("analyzeBill", () => {
     expect(questionableTotal).toBe(265); // $385 vs $120 high end
   });
 
+  it("finds all four planted errors in the urgent care sample", () => {
+    const { flags, questionableTotal } = analyzeBill(getSample("urgent-care")!.bill);
+    expect(flags.map((f) => [f.type, f.lineIndex, f.estimatedOvercharge]).sort()).toEqual(
+      [
+        ["duplicate", 3, 60],
+        ["math", null, 75],
+        ["price", 4, 300],
+        ["quantity", 5, 160],
+      ].sort(),
+    );
+    expect(flags.every((f) => f.severity === "high")).toBe(true);
+    expect(questionableTotal).toBe(595);
+  });
+
   it("flags a total that exceeds the sum of line items", () => {
     const { flags, questionableTotal } = analyzeBill(getSample("imaging")!.bill);
     expect(flags).toHaveLength(1);

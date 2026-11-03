@@ -5,6 +5,8 @@ import { BillSchema } from "@/lib/schema";
 import { buildLetterPrompt, fallbackLetter, type LetterInput } from "@/lib/letter";
 import { errorResponse } from "@/lib/api";
 
+export const maxDuration = 60;
+
 const RequestSchema = z.object({
   bill: BillSchema,
   financialAssistance: z.boolean().default(false),

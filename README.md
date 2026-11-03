@@ -21,10 +21,15 @@ BillBuster gives anyone a second pair of eyes: in under a minute, you know which
   - unusual quantities (for example, 10 ER visits in one day)
   - prices far above an estimated typical range for about 30 common CPT codes
   - math errors (line items that don't add up to the total, or an amount owed that doesn't match)
+
+  Future work, not checked today:
+  - unbundling (services billed separately that should be billed together under one code)
+  - comparing a bill against its EOB (an EOB can be uploaded and read like a bill, but only one file at a time, so nothing is cross-checked)
+
 - **Plain-English explanations**: one sentence per charge, at an 8th-grade reading level.
 - **Dispute letter**: a polite, firm letter citing each flagged item, with an optional financial-assistance request. You can edit, copy, or download it as `.txt`.
 - **Practice the call**: rehearse the phone call with "Pat," an AI billing rep (ElevenLabs voice agent) who knows your actual flagged items. Pat pushes back at first and concedes when you cite the specific error. A sidebar shows your talking points, with a suggested sentence for each flag.
-- **Demo-proof samples**: three fictional bills. If the AI call fails, the samples fall back to known-good data so a live demo never dead-ends.
+- **Demo-proof samples**: four fictional bills. If the AI call fails, the samples fall back to known-good data so a live demo never dead-ends.
 - **Private by design**: uploads are processed in memory and never stored. The current bill lives only in your browser tab's `sessionStorage`.
 
 ## How it works
@@ -124,7 +129,7 @@ lib/
   gemini.ts               Gemini client with JSON validation and retry
   letter.ts               letter prompt + template fallback
   practice.ts             talking points + dynamic variables for Pat
-  samples.ts              the three fictional sample bills
+  samples.ts              the fictional sample bills
 data/typical-prices.json  estimated price ranges (rough estimates, not a source of truth)
 docs/pat-agent-prompt.md  Pat's system prompt and first message (paste into ElevenLabs)
 scripts/render-samples.ts renders sample bills to PNG
@@ -167,6 +172,15 @@ The rest of the app works without this. If it isn't configured, the practice pag
 
 The variable names in the prompt (`provider_name`, `account_ref`, `date_of_service`, `amount_owed`, `questionable_total`, `flagged_items`) must match `buildDynamicVariables` in `lib/practice.ts`. A unit test checks this.
 
+### Simulated payment (optional)
+
+The results page can run a test payment of the estimated corrected total through [PayPal's sandbox](https://developer.paypal.com/tools/sandbox/). It's a simulation: no real money moves, and it doesn't settle the bill with the provider. The server refuses any PayPal host other than the sandbox.
+
+1. In the [PayPal developer dashboard](https://developer.paypal.com/dashboard/applications), switch to **Sandbox** and copy your app's client ID and secret.
+2. Copy `.env.example` to `.env` and fill in `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`. Keep `PAYPAL_BASE_URL` as it is.
+3. Run `npm run paypal:check`, which should print `PayPal auth OK`, then restart `npm run dev`.
+4. To approve a test payment, log in on PayPal's page with a sandbox **personal** account from the dashboard.
+
 ### Other commands
 
 | Command           | What it does                                                                                                       |
@@ -194,13 +208,19 @@ Keys live only in Vercel's environment variables; `.vercelignore` keeps local `.
 
 ## Sample bills
 
-All sample data is fictional. Each bill demonstrates one rule:
+All sample data is fictional. Click one under **"No bill handy? Grab a sample."** on the home page, or upload its PNG from `public/samples/`. If the AI call fails or takes over 25 seconds, clicking a sample falls back to saved data; uploading a PNG doesn't. The results page always says which path was used: "Read by AI" or "Using saved sample data".
 
-| Sample   | Error                              | Questionable |
-| -------- | ---------------------------------- | ------------ |
-| ER visit | IV push (96374) billed twice       | $295         |
-| Lab work | Lipid panel at $385 vs. ~$30–$120  | $265         |
-| Imaging  | Total is $300 more than line items | $300         |
+Each of the first three demonstrates one rule, and Urgent care demonstrates all four:
+
+| Sample      | Error                                            | Questionable |
+| ----------- | ------------------------------------------------ | ------------ |
+| ER visit    | IV push (96374) billed twice                     | $295         |
+| Lab work    | Lipid panel at $385 vs. ~$30–$120                | $265         |
+| Imaging     | Total is $300 more than line items               | $300         |
+| Urgent care | Second CBC (85025), $60                          | $60          |
+| Urgent care | Metabolic panel (80053) at $420 vs. ~$30–$120    | $300         |
+| Urgent care | 24 units of ondansetron (J2405), usual maximum 8 | $160         |
+| Urgent care | Total is $75 more than line items                | $75          |
 
 ## Screenshots
 

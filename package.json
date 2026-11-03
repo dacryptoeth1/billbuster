@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "samples": "tsx scripts/render-samples.ts",
+    "paypal:check": "tsx scripts/paypal-check.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

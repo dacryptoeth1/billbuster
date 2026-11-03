@@ -1,6 +1,8 @@
-import { generateJson } from "@/lib/gemini";
+import { GeminiBusyError, generateJson } from "@/lib/gemini";
 import { BillSchema } from "@/lib/schema";
 import { errorResponse } from "@/lib/api";
+
+export const maxDuration = 60;
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const ALLOWED_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/webp", "image/heic"];
@@ -31,7 +33,13 @@ export async function POST(request: Request) {
       { inlineData: { mimeType: file.type, data } },
     ]);
     return Response.json({ bill });
-  } catch {
+  } catch (err) {
+    if (err instanceof GeminiBusyError) {
+      return errorResponse(
+        "Our AI bill reader is very busy right now, so we couldn't read your bill. Please try again in a minute, or try a sample bill.",
+        503,
+      );
+    }
     return errorResponse(
       "We couldn't read that bill. Try a clearer photo or PDF, or use a sample bill.",
       422,
