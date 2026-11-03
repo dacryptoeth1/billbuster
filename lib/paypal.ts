@@ -54,7 +54,7 @@ async function toApiError(res: Response) {
   };
   const issue = body.details?.[0]?.issue ?? body.name;
   console.warn(
-    `PayPal HTTP ${res.status}: ${issue ?? "unknown error"} (debug id ${body.debug_id ?? "none"})`,
+    `PayPal HTTP ${res.status}: ${body.name ?? "unnamed"}, ${issue ?? "unknown issue"} (debug id ${body.debug_id ?? "none"})`,
   );
   return new PayPalApiError(res.status, issue);
 }
@@ -151,6 +151,9 @@ export async function captureTestOrder(orderId: string): Promise<TestPaymentResu
 
   // PayPal no longer replays the first response, so read back the capture that already happened.
   const existing = await send(`/v2/checkout/orders/${orderId}`, { headers: auth });
-  if (!existing.ok) throw await toApiError(existing);
+  if (!existing.ok) {
+    await toApiError(existing); // logs why the read failed
+    throw error; // the page should still say it was already captured
+  }
   return toResult(orderId, await readOrder(existing));
 }

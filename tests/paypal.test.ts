@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as createOrder } from "@/app/api/paypal/orders/route";
-import { POST as captureOrder } from "@/app/api/paypal/orders/[id]/capture/route";
+import { POST as captureOrder } from "@/app/api/paypal/capture/route";
+import { captureTestPayment } from "@/lib/client";
 import { correctedTotal } from "@/lib/flags";
 import type { Bill } from "@/lib/schema";
 
@@ -40,10 +41,13 @@ const postOrder = (body: unknown) =>
       body: JSON.stringify(body),
     }),
   );
-const postCapture = (id: string) =>
-  captureOrder(new Request(`http://localhost:3000/api/paypal/orders/${id}/capture`, { method: "POST" }), {
-    params: Promise.resolve({ id }),
-  });
+const postCapture = (orderId: string) =>
+  captureOrder(
+    new Request("http://localhost:3000/api/paypal/capture", {
+      method: "POST",
+      body: JSON.stringify({ orderId }),
+    }),
+  );
 
 /** Queues fetch responses in order and records each call. */
 function mockFetch(...responses: (() => Response)[]) {
@@ -183,7 +187,7 @@ describe("POST /api/paypal/orders", () => {
   });
 });
 
-describe("POST /api/paypal/orders/[id]/capture", () => {
+describe("POST /api/paypal/capture", () => {
   it("captures with a request ID tied to the order", async () => {
     const fetchMock = mockFetch(tokenResponse, capturedOrder);
     const res = await postCapture("ORDER1");
@@ -235,6 +239,11 @@ describe("POST /api/paypal/orders/[id]/capture", () => {
   it.each([
     ["INSTRUMENT_DECLINED", "declined"],
     ["ORDER_NOT_APPROVED", "approval"],
+    ["ORDER_EXPIRED", "expired"],
+    ["INVALID_RESOURCE_ID", "can't find"],
+    ["TRANSACTION_REFUSED", "refused"],
+    ["MAX_NUMBER_OF_PAYMENT_ATTEMPTS_EXCEEDED", "too many attempts"],
+    ["PAYER_ACTION_REQUIRED", "test buyer"],
   ])("explains %s", async (issue, text) => {
     mockFetch(tokenResponse, () => paypalError(422, issue));
     const res = await postCapture("ORDER1");
@@ -242,9 +251,68 @@ describe("POST /api/paypal/orders/[id]/capture", () => {
     expect((await res.json()).error).toContain(text);
   });
 
+  it("says the order was already captured if its receipt can't be read back", async () => {
+    mockFetch(
+      tokenResponse,
+      () => paypalError(422, "ORDER_ALREADY_CAPTURED"),
+      () => json({ name: "INTERNAL_SERVER_ERROR" }, 500),
+    );
+    const res = await postCapture("ORDER1");
+    expect(res.status).toBe(502);
+    expect((await res.json()).error).toContain("already captured");
+  });
+
+  it("logs PayPal's name, issue and debug id, but never the credentials or token", async () => {
+    const warn = vi.mocked(console.warn);
+    mockFetch(tokenResponse, () => paypalError(422, "ORDER_NOT_APPROVED"));
+    await postCapture("ORDER1");
+    const logged = warn.mock.calls.flat().join(" ");
+    expect(logged).toContain("UNPROCESSABLE_ENTITY");
+    expect(logged).toContain("ORDER_NOT_APPROVED");
+    expect(logged).toContain("dbg");
+    expect(logged).not.toContain("ACCESS-TOKEN");
+    expect(logged).not.toContain("TEST-SECRET");
+  });
+
+  it("gives a message for an unknown PayPal error without passing its text through", async () => {
+    mockFetch(tokenResponse, () => paypalError(422, "SOME_NEW_ISSUE"));
+    const { error } = await (await postCapture("ORDER1")).json();
+    expect(error).toContain("Couldn't complete the test payment");
+    expect(error).not.toContain("SOME_NEW_ISSUE");
+  });
+
   it.each(["order1", "../../v1/oauth2/token", "A".repeat(37), ""])("rejects order ID %j", async (id) => {
     const fetchMock = mockFetch();
     expect((await postCapture(id)).status).toBe(400);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a body with no order ID", async () => {
+    const fetchMock = mockFetch();
+    const res = await captureOrder(
+      new Request("http://localhost:3000/api/paypal/capture", { method: "POST", body: "not json" }),
+    );
+    expect(res.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("captureTestPayment", () => {
+  it("posts the order ID to the static capture route", async () => {
+    const fetchMock = mockFetch(() => json({ result: { orderId: "BROWSER1" } }));
+    await captureTestPayment("BROWSER1");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/api/paypal/capture");
+    expect(JSON.parse(init.body as string)).toEqual({ orderId: "BROWSER1" });
+  });
+
+  it("explains a server crash that returns HTML instead of the generic message", async () => {
+    mockFetch(() => new Response("<!DOCTYPE html><html></html>", { status: 500 }));
+    await expect(captureTestPayment("BROWSER2")).rejects.toThrow("can't say whether it went through");
+  });
+
+  it("shows the server's message when it sends one", async () => {
+    mockFetch(() => json({ error: "PayPal refused this test payment." }, 502));
+    await expect(captureTestPayment("BROWSER3")).rejects.toThrow("PayPal refused this test payment.");
   });
 });

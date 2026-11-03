@@ -6,18 +6,20 @@ import type { Bill, TestPaymentResult } from "@/lib/schema";
 
 /** Browser-side API helpers. Each throws an Error with a user-friendly message. */
 
-async function postJson<T>(url: string, body: unknown): Promise<T> {
+const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+async function postJson<T>(url: string, body: unknown, fallbackError = GENERIC_ERROR): Promise<T> {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  return readResponse<T>(res);
+  return readResponse<T>(res, fallbackError);
 }
 
-async function readResponse<T>(res: Response): Promise<T> {
+async function readResponse<T>(res: Response, fallbackError = GENERIC_ERROR): Promise<T> {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please try again.");
+  if (!res.ok) throw new Error(data.error ?? fallbackError);
   return data as T;
 }
 
@@ -82,12 +84,17 @@ export async function startTestPayment(bill: Bill): Promise<string> {
 // One in-flight capture per order, for the same reason as explainRequests above.
 const captureRequests = new Map<string, Promise<TestPaymentResult>>();
 
+// Shown when the server fails without saying why. Refreshing is safe: a repeat can't capture twice.
+const CAPTURE_SERVER_ERROR =
+  "The server failed before confirming this test payment, so we can't say whether it went through. Refresh this page to try again.";
+
 export function captureTestPayment(orderId: string): Promise<TestPaymentResult> {
   let request = captureRequests.get(orderId);
   if (!request) {
     request = postJson<{ result: TestPaymentResult }>(
-      `/api/paypal/orders/${encodeURIComponent(orderId)}/capture`,
-      {},
+      "/api/paypal/capture",
+      { orderId },
+      CAPTURE_SERVER_ERROR,
     ).then((r) => r.result);
     captureRequests.set(orderId, request);
   }
